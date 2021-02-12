@@ -132,7 +132,7 @@ static void canvas_window_setup() {
 		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 		canvas_win = glfwCreateWindow(mode->width, mode->height, "Pixelflut", monitor, NULL);
 	} else {
-		canvas_win = glfwCreateWindow(800, 600, "Pixelflut", NULL, NULL);
+		canvas_win = glfwCreateWindow(WIDTH, HEIGHT, "Pixelflut", NULL, NULL);
 	}
 
 	if (!canvas_win) {
