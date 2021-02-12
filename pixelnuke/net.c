@@ -1,5 +1,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 
 #include <event2/event.h>
@@ -15,6 +16,7 @@
 #include <errno.h>
 #include <err.h>
 
+#include "config.h"
 #include "net.h"
 
 // Lines longer than this are considered an error.
@@ -23,7 +25,7 @@
 // The server buffers up to NET_READ_BUFFER bytes per client connection.
 // Lower values allow lots of clients to draw at the same time, each with a fair share.
 // Higher values increase throughput but fast clients might be able to draw large batches at once.
-#define NET_MAX_BUFFER 10240
+#define NET_MAX_BUFFER 102400
 
 typedef struct NetClient {
 	int sock_fd;
@@ -188,8 +190,8 @@ void net_start(int port, net_on_connect on_connect, net_on_read on_read,
 	//evthread_make_base_notifiable(base);
 
 	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = 0;
-	sin.sin_port = htons(1337);
+	sin.sin_addr.s_addr = inet_addr(HOST);
+	sin.sin_port = htons(PORT);
 	listener = socket(AF_INET, SOCK_STREAM, 0);
 	evutil_make_socket_nonblocking(listener);
 	evutil_make_listen_socket_reuseable(listener);

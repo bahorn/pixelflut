@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h> //memcpy
 
+#include "config.h"
 #include "canvas.h"
 
 typedef struct CanvasLayer {
@@ -21,7 +22,7 @@ typedef struct CanvasLayer {
 // Global state
 
 static int canvas_display = -1;
-static unsigned int canvas_tex_size = 1024;
+static unsigned int canvas_tex_size = TEX_SIZE;
 static int canvas_width=0;
 static int canvas_height=0;
 static GLFWwindow* canvas_win;
