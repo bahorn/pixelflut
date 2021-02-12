@@ -96,7 +96,7 @@ class Examples:
                         , 100-math.floor(64*(t/maxr)), 10))
 
 if __name__ == '__main__':
-    pf = PixelFlut(('localhost', 1338))
+    pf = PixelFlut(('entry.athon.uk', 1337))
     print(pf.get(0,0))
     if len(sys.argv) < 2:
         exit()
