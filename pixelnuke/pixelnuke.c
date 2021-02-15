@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
 
 	canvas_start(px_width, &px_on_window_close);
 
-	net_start(1337, &px_on_connect, &px_on_read, &px_on_close);
+	net_start(PORT, &px_on_connect, &px_on_read, &px_on_close);
 	return 0;
 }
 
