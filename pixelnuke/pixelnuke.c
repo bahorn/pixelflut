@@ -141,6 +141,9 @@ void px_on_read(NetClient *client, char *line) {
 				px_clientcount);
 		net_send(client, str);
 
+    } else if (fast_str_startswith("CLEAR", line)) {
+		// super sekret command
+        canvas_fill(0x00000088);
 	} else if (fast_str_startswith("HELP", line)) {
 
 		net_send(client,
