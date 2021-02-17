@@ -1,48 +1,11 @@
-import socket
 import random
 import time
-import binascii
 import sys
 import math
 import struct
+from PIL import Image
 
-class PixelFlut:
-    def __init__(self, remote):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect(remote)
-
-    def set(self, x, y, value):
-        self.s.send(
-            bytes('PX {:g} {:g} {:s}\n'.format(x, y, value), 'ascii')
-        )
-
-    def get(self, x, y):
-        self.s.send(bytes('PX {} {}\n'.format(x, y), 'ascii'))
-        res = self.s.recv(1024)
-        hexc = res[:-1].decode('ascii').split(' ')[-1]
-        return tuple(bytes.fromhex(hexc))
-    
-    def dims(self):
-        self.s.send(b'SIZE\n')
-        res = self.s.recv(1024).decode('ascii')
-        return list(map(int, res[:-1].split(' ')[1:]))
-
-
-def clamp(x): 
-  return max(0, min(x, 255))
-
-def rgba(r,g,b,a):
-    return binascii.hexlify(
-        struct.pack('BBBB', clamp(r), clamp(g), clamp(b),
-                    clamp(a))).decode('ascii')
-
-def random_color(alpha):
-    return rgba(
-        random.randint(0, 255),
-        random.randint(0, 255),
-        random.randint(0, 255),
-        alpha
-    )
+from pixelflut import random_color, rgba, PixelFlut
 
 class Examples:
     @staticmethod
@@ -68,15 +31,13 @@ class Examples:
                 pf.set(v, k, rgba(255, 255, 255, 64))
                 pf.set(k, v, rgba(255, 255, 255, 64))
 
-
-
     @staticmethod
     def clear(pf):
         (width, height) = pf.dims()
         while True:
             for x in range(width):
                 for y in range(height):
-                    pf.set(x, y, rgba(0, 0, 0, 32))
+                    pf.set(x, y, rgba(0, 0, 0, 64))
 
     @staticmethod
     def spiral(pf):
@@ -95,16 +56,52 @@ class Examples:
                         , math.floor(255*(t/maxr))
                         , 100-math.floor(64*(t/maxr)), 10))
 
+    @staticmethod
+    def image(pf):
+        (width, height) = pf.dims()
+        
+        img = Image.open('covhack.png')
+        rsz_x = 128
+        rsz_y = 128
+        rsz = img.resize((rsz_x, rsz_y))
+        out = rsz.convert('1')
+        offset_x = random.randint(0, width)
+        offset_y = random.randint(0, height)
+        t = 0
+        while True:
+            t += 0.1
+            r = random.randint(0, 255)
+            g = random.randint(0, 255)
+            b = random.randint(0, 255)
+            offset_x += 50 #random.randint(0,width)
+            offset_y += 50 #random.randint(0,height)
+            for x in range(rsz_x):
+                for y in range(rsz_y):
+                    a = out.getpixel((x,y))
+                    if a == 0:
+                        continue
+                    color = rgba(r, g, b, int(a))
+                    pf.set(
+                        int(offset_x+1*x) % width, 
+                        int(offset_y+1*y) % height, 
+                        color
+                    )
+
+samples = {
+    'image': Examples.image,
+    'grid': Examples.grid,
+    'spiral': Examples.spiral,
+    'clear': Examples.clear,
+    'random': Examples.random_walk
+}
+
 if __name__ == '__main__':
     pf = PixelFlut(('entry.athon.uk', 1337))
-    print(pf.get(0,0))
+
     if len(sys.argv) < 2:
         exit()
-    if sys.argv[1] == "random":
-        Examples.random_walk(pf)
-    elif sys.argv[1] == "grid":
-        Examples.grid(pf)
-    elif sys.argv[1] == "spiral":
-        Examples.spiral(pf)
-    else:
-        Examples.clear(pf)
+    
+    samples.get(
+        sys.argv[1],
+        lambda _: print('unknown function')
+    )(pf)

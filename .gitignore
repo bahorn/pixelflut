@@ -4,3 +4,7 @@ pixelnuke/pixelnuke
 
 pixelwar/.*
 pixelwar/target
+
+
+old
+__pycache__
